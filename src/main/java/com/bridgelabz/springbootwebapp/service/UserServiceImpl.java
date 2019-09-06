@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 
 import com.bridgelabz.springbootwebapp.dto.LoginDTO;
 import com.bridgelabz.springbootwebapp.dto.RegisterDTO;
+import com.bridgelabz.springbootwebapp.dto.ResetPasswordDTO;
 import com.bridgelabz.springbootwebapp.model.User;
 import com.bridgelabz.springbootwebapp.repository.UserRepository;
 import com.bridgelabz.springbootwebapp.util.EmailUtil;
+import com.bridgelabz.springbootwebapp.util.GenerateURL;
 import com.bridgelabz.springbootwebapp.util.TokenUtil;
 
 @Service
@@ -34,7 +36,8 @@ public class UserServiceImpl implements UserService {
 		user.setUpdatedTime(currentTime);
 		user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
 		user = userRepository.save(user);
-		EmailUtil.sendEmail(registerDTO.getEmailID(), "Mail Verification", TokenUtil.generateToken(user.getId()));
+		String url = GenerateURL.getUrl("verify", user.getId());
+		EmailUtil.sendEmail(registerDTO.getEmailID(), "Mail Verification", url);
 		return user;
 
 	}
@@ -60,5 +63,27 @@ public class UserServiceImpl implements UserService {
 		} else {
 			return "Incorrect EmailID/Password";
 		}
+	}
+
+	@Override
+	public String forgotPassword(String emailID) throws Exception {
+		User user = userRepository.findByEmailID(emailID).orElseThrow(() -> new Exception("EmailID not found"));
+		String url = GenerateURL.getUrl("resetpassword", user.getId());
+		EmailUtil.sendEmail(emailID, "Password Reset", url);
+		return "Password reset link has been sent to the registered email.";
+	}
+
+	@Override
+	public String resetPassword(ResetPasswordDTO resetPasswordDTO, String token) throws Exception {
+		Long id = TokenUtil.verifyToken(token);
+		User user = userRepository.findById(id).orElseThrow(() -> new Exception("Invalid Token"));
+		if (resetPasswordDTO.getNewPassword().equals(resetPasswordDTO.getConfirmPassword())) {
+			user.setPassword(passwordEncoder.encode(resetPasswordDTO.getConfirmPassword()));
+			userRepository.save(user);
+			return "Your password is successfully updated! You can login with your new password now.";
+		} else {
+			return "Please enter the password fields correctly.";
+		}
+
 	}
 }

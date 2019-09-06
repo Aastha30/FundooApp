@@ -41,8 +41,7 @@ public class EmailUtil {
 				 message.setFrom(new InternetAddress(from));
 				 message.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
 				 message.setSubject(subject);
-				 String url="http://localhost:8080/fundoo/verify/" +token;
-				 message.setText(url);
+				 message.setText(token);
 				 Transport.send(message);
 			 }
 			 catch(Exception e)
