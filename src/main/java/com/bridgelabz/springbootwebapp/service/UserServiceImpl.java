@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.bridgelabz.springbootwebapp.dto.LoginDTO;
 import com.bridgelabz.springbootwebapp.dto.RegisterDTO;
 import com.bridgelabz.springbootwebapp.dto.ResetPasswordDTO;
+import com.bridgelabz.springbootwebapp.exception.UserException;
 import com.bridgelabz.springbootwebapp.model.User;
 import com.bridgelabz.springbootwebapp.repository.UserRepository;
 import com.bridgelabz.springbootwebapp.util.EmailUtil;
@@ -30,6 +31,11 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User register(RegisterDTO registerDTO) throws Exception {
+
+		if (userRepository.findByEmailID(registerDTO.getEmailID()).isPresent()
+				|| userRepository.findByMobNum(registerDTO.getMobNum()).isPresent()) {
+			throw new UserException(400, "Duplicate User Details Found");
+		}
 		User user = modelMapper.map(registerDTO, User.class);
 		LocalDateTime currentTime = LocalDateTime.now();
 		user.setCreatedTime(currentTime);
@@ -45,7 +51,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String verifyUser(String token) throws Exception {
 		Long id = TokenUtil.verifyToken(token);
-		User user = userRepository.findById(id).orElseThrow(() -> new Exception("Invalid Token"));
+		User user = userRepository.findById(id).orElseThrow(() -> new UserException(400, "Invalid Token"));
 		user.setVerified(true);
 		userRepository.save(user);
 		return "Token Verified Successfully";
@@ -54,20 +60,21 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String login(LoginDTO loginDTO) throws Exception {
 		User user = userRepository.findByEmailID(loginDTO.getEmailID())
-				.orElseThrow(() -> new Exception("User is not Registered"));
+				.orElseThrow(() -> new UserException(404,"User is not Registered"));
 		if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword()) && user.isVerified())
-			return "You are successfully logged in";
+			return TokenUtil.generateToken(user.getId());
 		else if (!user.isVerified()) {
-			EmailUtil.sendEmail(loginDTO.getEmailID(), "Email Verification", TokenUtil.generateToken(user.getId()));
-			return "Validation is required! Please check your email to verify.";
+			String url=GenerateURL.getUrl("verify", user.getId());
+			EmailUtil.sendEmail(loginDTO.getEmailID(), "Email Verification", url);
+			throw new UserException(404, "Validation is required! Please check your email to verify.");
 		} else {
-			return "Incorrect EmailID/Password";
+			throw new UserException(401, "Incorrect EmailID/Password") ;
 		}
 	}
 
 	@Override
 	public String forgotPassword(String emailID) throws Exception {
-		User user = userRepository.findByEmailID(emailID).orElseThrow(() -> new Exception("EmailID not found"));
+		User user = userRepository.findByEmailID(emailID).orElseThrow(() -> new UserException(404, "EmailID not found"));
 		String url = GenerateURL.getUrl("resetpassword", user.getId());
 		EmailUtil.sendEmail(emailID, "Password Reset", url);
 		return "Password reset link has been sent to the registered email.";
@@ -76,13 +83,13 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String resetPassword(ResetPasswordDTO resetPasswordDTO, String token) throws Exception {
 		Long id = TokenUtil.verifyToken(token);
-		User user = userRepository.findById(id).orElseThrow(() -> new Exception("Invalid Token"));
+		User user = userRepository.findById(id).orElseThrow(() -> new UserException(400,"Invalid Token"));
 		if (resetPasswordDTO.getNewPassword().equals(resetPasswordDTO.getConfirmPassword())) {
 			user.setPassword(passwordEncoder.encode(resetPasswordDTO.getConfirmPassword()));
 			userRepository.save(user);
 			return "Your password is successfully updated! You can login with your new password now.";
 		} else {
-			return "Please enter the password fields correctly.";
+			throw new UserException(401, "Please enter the password fields correctly.") ;
 		}
 
 	}

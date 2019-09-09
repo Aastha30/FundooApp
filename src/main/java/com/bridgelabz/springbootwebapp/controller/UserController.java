@@ -1,6 +1,8 @@
 package com.bridgelabz.springbootwebapp.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bridgelabz.springbootwebapp.dto.LoginDTO;
 import com.bridgelabz.springbootwebapp.dto.RegisterDTO;
 import com.bridgelabz.springbootwebapp.dto.ResetPasswordDTO;
-import com.bridgelabz.springbootwebapp.model.User;
+import com.bridgelabz.springbootwebapp.response.Response;
 import com.bridgelabz.springbootwebapp.service.UserService;
 
 @RestController
@@ -23,29 +25,48 @@ public class UserController {
 	@Autowired
 	UserService userService;
 
-	@PostMapping("/register")
-	public User register(@RequestBody RegisterDTO registerDTO) throws Exception {
-		return userService.register(registerDTO);
+	Response response=new Response();
+	
+	@PostMapping("/register")	
+	public ResponseEntity<Response> register(@RequestBody RegisterDTO registerDTO) throws Exception {
+		userService.register(registerDTO);
+		response.setStatusCode(200);
+		response.setStatusMessage("Registered Successfully");
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@GetMapping("/verify/{token}")
-	public String verifyToken(@PathVariable String token) throws Exception {
-		return userService.verifyUser(token);
+	public ResponseEntity<Response> verifyToken(@PathVariable String token) throws Exception {
+		String message = userService.verifyUser(token);
+		response.setStatusCode(200);
+		response.setStatusMessage(message);
+		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 
 	@PostMapping("/login")
-	public String login(@RequestBody LoginDTO loginDTO) throws Exception {
-		return userService.login(loginDTO);
+	public ResponseEntity<Response> login(@RequestBody LoginDTO loginDTO) throws Exception {
+		 userService.login(loginDTO);
+		 response.setStatusCode(200);
+		 response.setStatusMessage("You are successfully logged in");
+		 return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 
 	@PostMapping("/forgotpassword")
-	public String forgotPassword(@RequestParam String emailID) throws Exception {
-		return userService.forgotPassword(emailID);
+	public ResponseEntity<Response> forgotPassword(@RequestParam String emailID) throws Exception {
+		String message=userService.forgotPassword(emailID);
+		response.setStatusCode(202);
+		response.setStatusMessage(message);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+		
 	}
 
 	@PutMapping("/resetpassword/{token}")
-	public String resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO, @PathVariable String token)
+	public ResponseEntity<Response> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO, @PathVariable String token)
 			throws Exception {
-		return userService.resetPassword(resetPasswordDTO, token);
+		String message=userService.resetPassword(resetPasswordDTO, token);
+		response.setStatusCode(200);
+		response.setStatusMessage(message);
+		return new ResponseEntity<>(response,HttpStatus.OK);
+		 
 	}
 }
