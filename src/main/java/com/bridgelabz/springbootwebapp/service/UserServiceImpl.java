@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 		user.setUpdatedTime(currentTime);
 		user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
 		user = userRepository.save(user);
-		String url = GenerateURL.getUrl("verify", user.getId());
+		String url = GenerateURL.getUrl("verify", user.getUserID());
 		EmailUtil.sendEmail(registerDTO.getEmailID(), "Mail Verification", url);
 		return user;
 
@@ -62,9 +62,9 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findByEmailID(loginDTO.getEmailID())
 				.orElseThrow(() -> new UserException(404,"User is not Registered"));
 		if (passwordEncoder.matches(loginDTO.getPassword(), user.getPassword()) && user.isVerified())
-			return TokenUtil.generateToken(user.getId());
+			return TokenUtil.generateToken(user.getUserID());
 		else if (!user.isVerified()) {
-			String url=GenerateURL.getUrl("verify", user.getId());
+			String url=GenerateURL.getUrl("verify", user.getUserID());
 			EmailUtil.sendEmail(loginDTO.getEmailID(), "Email Verification", url);
 			throw new UserException(404, "Validation is required! Please check your email to verify.");
 		} else {
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public String forgotPassword(String emailID) throws Exception {
 		User user = userRepository.findByEmailID(emailID).orElseThrow(() -> new UserException(404, "EmailID not found"));
-		String url = GenerateURL.getUrl("resetpassword", user.getId());
+		String url = GenerateURL.getUrl("resetpassword", user.getUserID());
 		EmailUtil.sendEmail(emailID, "Password Reset", url);
 		return "Password reset link has been sent to the registered email.";
 	}

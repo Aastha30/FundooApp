@@ -1,12 +1,14 @@
 package com.bridgelabz.springbootwebapp.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -18,7 +20,7 @@ public class User {
 	
 	@Id
 	@GeneratedValue(strategy= GenerationType.AUTO)
-	private long id;
+	private long userID;
 	@Column(nullable=false)
 	private String firstName;
 	@Column(nullable=false)
@@ -36,5 +38,8 @@ public class User {
 	@DateTimeFormat
 	private LocalDateTime updatedTime;
 	private boolean isVerified;
+	
+	@OneToMany(mappedBy="userID")
+	private List<Note> notes;
 	
 }

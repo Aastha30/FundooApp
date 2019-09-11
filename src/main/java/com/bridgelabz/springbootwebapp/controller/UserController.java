@@ -23,7 +23,7 @@ import com.bridgelabz.springbootwebapp.service.UserService;
 public class UserController {
 
 	@Autowired
-	UserService userService;
+	private UserService userService;
 
 	Response response=new Response();
 	
