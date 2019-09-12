@@ -16,8 +16,8 @@ import lombok.Data;
 public class Label {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long lableID;
-	private Long noteID;
+	private Long labelID;
+	private Long userID;
 	@Column(nullable = false)
 	private String labelName;
 	@ManyToMany(mappedBy = "labels")
