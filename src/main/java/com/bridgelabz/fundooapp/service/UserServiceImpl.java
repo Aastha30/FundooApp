@@ -87,6 +87,7 @@ public class UserServiceImpl implements UserService {
 		User user = userRepository.findById(id).orElseThrow(() -> new UserException(400,"Invalid Token"));
 		if (resetPasswordDTO.getNewPassword().equals(resetPasswordDTO.getConfirmPassword())) {
 			user.setPassword(passwordEncoder.encode(resetPasswordDTO.getConfirmPassword()));
+			user.setUpdatedTime(LocalDateTime.now());
 			userRepository.save(user);
 			return "Your password is successfully updated! You can login with your new password now.";
 		} else {

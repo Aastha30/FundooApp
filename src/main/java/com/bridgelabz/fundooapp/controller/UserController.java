@@ -2,9 +2,12 @@ package com.bridgelabz.fundooapp.controller;
 
 
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +24,9 @@ import com.bridgelabz.fundooapp.response.Response;
 import com.bridgelabz.fundooapp.service.UserService;
 
 @RestController
+@CrossOrigin(origins="http://localhost:4200",exposedHeaders= {"jwt_token"})
 @RequestMapping("/fundoo/user")
+
 public class UserController {
 
 	@Autowired
@@ -47,8 +52,9 @@ public class UserController {
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<Response> login(@RequestBody LoginDTO loginDTO) throws Exception {
-		 userService.login(loginDTO);
+	public ResponseEntity<Response> login(@RequestBody LoginDTO loginDTO, HttpServletResponse httpResponse) throws Exception {
+		 String token=userService.login(loginDTO);
+		 httpResponse.addHeader("jwt_token", token);
 		 response.setStatusCode(200);
 		 response.setStatusMessage("You are successfully logged in");
 		 return new ResponseEntity<>(response,HttpStatus.OK);
