@@ -1,10 +1,11 @@
-package com.bridgelabz.fundooapp.controller;
+ package com.bridgelabz.fundooapp.controller;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,8 @@ import com.bridgelabz.fundooapp.util.TokenUtil;
 
 @RestController
 @RequestMapping("/fundoo/note")
+@CrossOrigin(origins="http://localhost:4200",exposedHeaders= {"jwt_token"})
+
 public class NoteController {
 	
 	@Autowired
@@ -71,6 +74,26 @@ public class NoteController {
 		response.setBody(notes);
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
-
-
+	
+	@PostMapping("/fetchArchive")
+	public ResponseEntity<Response> fetchArchivedNote(@RequestHeader String token)
+	{
+		Response response=new Response();
+		List<Note> archivedNotes=noteService.fetchArchivedNote(token);
+		response.setStatusCode(200);
+		response.setStatusMessage("Fetched Archived Notes of User ID: " +TokenUtil.verifyToken(token));
+		response.setBody(archivedNotes);
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
+	
+	@PostMapping("/fetchTrash")
+	public ResponseEntity<Response> fetchTrashedNote(@RequestHeader String token)
+	{
+		Response response=new Response();
+		List<Note> trashedNotes=noteService.fetchArchivedNote(token);
+		response.setStatusCode(200);
+		response.setStatusMessage("Fetched Trashed Notes of User ID: " +TokenUtil.verifyToken(token));
+		response.setBody(trashedNotes);
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
 }

@@ -32,19 +32,29 @@ public class NoteServiceImpl implements NoteService {
 		note.setUserID(userID);
 		note.setCreatedTime(currentTime);
 		note.setUpdatedTime(currentTime);
+		if (noteDTO.isArchive()) {
+			note.setPinned(false);
+		}
 		note = noteRepository.save(note);
 		return note;
 
 	}
 
 	@Override
-	public Note updateNote(NoteDTO noteDTO, long noteID,String token){
-		Long userID=TokenUtil.verifyToken(token);
-		Optional<Note> noteToBeUpdated =noteRepository.findByUserIDAndNoteID(userID,noteID);
-		Note updatedNote =noteToBeUpdated.map(existingNote -> {existingNote.setTitle(noteDTO.getTitle()!=null ? noteDTO.getTitle() : noteToBeUpdated.get().getTitle());
-		existingNote.setDescription(noteDTO.getDescription()!=null ? noteDTO.getDescription(): noteToBeUpdated.get().getDescription());
-		return existingNote;
-		}).orElseThrow(() -> new UserException(404,"Note Not Found"));
+	public Note updateNote(NoteDTO noteDTO, long noteID, String token) {
+		Long userID = TokenUtil.verifyToken(token);
+		Optional<Note> noteToBeUpdated = noteRepository.findByUserIDAndNoteID(userID, noteID);
+
+		Note updatedNote = noteToBeUpdated.map(existingNote -> {
+			existingNote.setTitle(noteDTO.getTitle() != null ? noteDTO.getTitle() : noteToBeUpdated.get().getTitle());
+			existingNote.setDescription(noteDTO.getDescription() != null ? noteDTO.getDescription()
+					: noteToBeUpdated.get().getDescription());
+			existingNote.setArchive(noteDTO.isTrash());
+			existingNote.setArchive(!noteDTO.isTrash() && noteDTO.isArchive());
+			existingNote.setPinned(noteDTO.isPinned() && !noteDTO.isTrash() && !noteDTO.isArchive());
+			;
+			return existingNote;
+		}).orElseThrow(() -> new UserException(404, "Note Not Found"));
 		updatedNote.setUpdatedTime(LocalDateTime.now());
 		return noteRepository.save(updatedNote);
 
@@ -52,34 +62,46 @@ public class NoteServiceImpl implements NoteService {
 
 	@Override
 	public void deleteNote(Long noteID, String token) {
-		
+
 		TokenUtil.verifyToken(token);
-		try
-		{
-		noteRepository.deleteById(noteID);
-		}
-		catch(Exception e) {
+		try {
+			noteRepository.deleteById(noteID);
+		} catch (Exception e) {
 			throw new UserException(404, "Note ID: " + noteID + " Not Found");
 		}
-		
+
 	}
 
 	@Override
 	public List<Note> fetchNote(String token) {
-		
-		try
-		{
-		Long userID=TokenUtil.verifyToken(token);
-		return noteRepository.findByUserID(userID);
-		}
-		catch(Exception e)
-		{
+
+		try {
+			Long userID = TokenUtil.verifyToken(token);
+			return noteRepository.findByUserID(userID,false,false);
+		} catch (Exception e) {
 			throw new UserException(404, "Token Not Found");
 		}
 	}
 
-	
+	@Override
+	public List<Note> fetchArchivedNote(String token) {
+		try {
+			Long userID = TokenUtil.verifyToken(token);
+			return noteRepository.findByUserID(userID,true,false);
+		} catch (Exception e) {
+			throw new UserException(404, "Token Not Found");
+		}
+	}
 
-	
+	@Override
+	public List<Note> fetchTrashedNote(String token) {
+		try {
+			Long userID = TokenUtil.verifyToken(token);
+			return noteRepository.findByUserID(userID,false,true);
+		} catch (Exception e) {
+			throw new UserException(404, "Token Not Found");
+		}
+
+	}
 
 }

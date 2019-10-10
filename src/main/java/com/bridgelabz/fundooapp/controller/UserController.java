@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bridgelabz.fundooapp.dto.LoginDTO;
 import com.bridgelabz.fundooapp.dto.RegisterDTO;
 import com.bridgelabz.fundooapp.dto.ResetPasswordDTO;
+import com.bridgelabz.fundooapp.dto.UserDetail;
 import com.bridgelabz.fundooapp.response.Response;
 import com.bridgelabz.fundooapp.service.UserService;
 
@@ -53,10 +54,11 @@ public class UserController {
 
 	@PostMapping("/login")
 	public ResponseEntity<Response> login(@RequestBody LoginDTO loginDTO, HttpServletResponse httpResponse) throws Exception {
-		 String token=userService.login(loginDTO);
-		 httpResponse.addHeader("jwt_token", token);
+		 UserDetail userDetail=userService.login(loginDTO);
+		// httpResponse.addHeader("jwt_token", token);
 		 response.setStatusCode(200);
 		 response.setStatusMessage("You are successfully logged in");
+		 response.setBody(userDetail);
 		 return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 
