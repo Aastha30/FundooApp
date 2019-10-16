@@ -18,30 +18,29 @@ import lombok.Data;
 @Data
 @Entity
 public class User {
-	
+
 	@Id
-	@GeneratedValue(strategy= GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long userID;
-	@Column(nullable=false)
+	@Column(nullable = false)
 	private String firstName;
-	@Column(nullable=false)
+	@Column(nullable = false)
 	private String lastName;
-	@Column(nullable=false,unique=true)
+	@Column(nullable = false, unique = true)
 	private String emailID;
-	@Column(nullable=false)
+	@Column(nullable = false)
 	private String password;
-	@Column(nullable=false,unique=true)
+	@Column(nullable = false, unique = true)
 	private long mobNum;
-	@Column(nullable=false)
+	@Column(nullable = false)
 	private String gender;
 	@DateTimeFormat
 	private LocalDateTime createdTime;
 	@DateTimeFormat
 	private LocalDateTime updatedTime;
 	private boolean isVerified;
-	
-	@OneToMany(mappedBy="userID")
+
+	@OneToMany(mappedBy = "userID")
 	private List<Note> notes;
-	
-	
+
 }

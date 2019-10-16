@@ -11,7 +11,9 @@ import org.springframework.stereotype.Service;
 import com.bridgelabz.fundooapp.dto.NoteDTO;
 import com.bridgelabz.fundooapp.exception.UserException;
 import com.bridgelabz.fundooapp.model.Note;
+import com.bridgelabz.fundooapp.model.User;
 import com.bridgelabz.fundooapp.repository.NoteRepository;
+import com.bridgelabz.fundooapp.repository.UserRepository;
 import com.bridgelabz.fundooapp.util.TokenUtil;
 
 @Service
@@ -22,6 +24,7 @@ public class NoteServiceImpl implements NoteService {
 
 	@Autowired
 	private ModelMapper modelMapper;
+	
 
 	@Override
 	public Note createNote(NoteDTO noteDTO, String token) throws Exception {
@@ -41,18 +44,20 @@ public class NoteServiceImpl implements NoteService {
 	}
 
 	@Override
-	public Note updateNote(NoteDTO noteDTO, long noteID, String token) {
+	public Note updateNote(Note note, String token) {
+		System.out.println("inside update note");
 		Long userID = TokenUtil.verifyToken(token);
-		Optional<Note> noteToBeUpdated = noteRepository.findByUserIDAndNoteID(userID, noteID);
+		Optional<Note> noteToBeUpdated = noteRepository.findByUserIDAndNoteID(userID, note.getNoteID());
 
 		Note updatedNote = noteToBeUpdated.map(existingNote -> {
-			existingNote.setTitle(noteDTO.getTitle() != null ? noteDTO.getTitle() : noteToBeUpdated.get().getTitle());
-			existingNote.setDescription(noteDTO.getDescription() != null ? noteDTO.getDescription()
+			existingNote.setTitle(note.getTitle() != null ? note.getTitle() : noteToBeUpdated.get().getTitle());
+			existingNote.setDescription(note.getDescription() != null ? note.getDescription()
 					: noteToBeUpdated.get().getDescription());
-			existingNote.setArchive(noteDTO.isTrash());
-			existingNote.setArchive(!noteDTO.isTrash() && noteDTO.isArchive());
-			existingNote.setPinned(noteDTO.isPinned() && !noteDTO.isTrash() && !noteDTO.isArchive());
-			;
+			existingNote.setTrash(note.isTrash());
+			existingNote.setArchive(!note.isTrash() && note.isArchive());
+			existingNote.setPinned(note.isPinned() && !note.isTrash() && !note.isArchive());
+			existingNote.setColor(note.getColor()!=null ? note.getColor(): noteToBeUpdated.get().getColor());
+			
 			return existingNote;
 		}).orElseThrow(() -> new UserException(404, "Note Not Found"));
 		updatedNote.setUpdatedTime(LocalDateTime.now());

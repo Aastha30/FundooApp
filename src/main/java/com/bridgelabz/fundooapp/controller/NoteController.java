@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bridgelabz.fundooapp.dto.NoteDTO;
@@ -44,11 +45,11 @@ public class NoteController {
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
-	@PutMapping("/update/{noteID}")
-	public ResponseEntity<Response> updateNote(@RequestBody NoteDTO noteDTO,@PathVariable Long noteID, @RequestHeader String token) throws Exception
+	@PutMapping("/update")
+	public ResponseEntity<Response> updateNote(@RequestBody Note note, @RequestHeader String token) throws Exception
 	{
 		Response response= new Response();
-		noteService.updateNote(noteDTO,noteID,token);
+		noteService.updateNote(note,token);
 		response.setStatusCode(200);
 		response.setStatusMessage("Note Updated Successfully");
 		return new ResponseEntity<>(response,HttpStatus.OK);
@@ -75,7 +76,7 @@ public class NoteController {
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
-	@PostMapping("/fetchArchive")
+	@GetMapping("/fetchArchive")
 	public ResponseEntity<Response> fetchArchivedNote(@RequestHeader String token)
 	{
 		Response response=new Response();
@@ -86,11 +87,11 @@ public class NoteController {
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
-	@PostMapping("/fetchTrash")
+	@GetMapping("/fetchTrash")
 	public ResponseEntity<Response> fetchTrashedNote(@RequestHeader String token)
 	{
 		Response response=new Response();
-		List<Note> trashedNotes=noteService.fetchArchivedNote(token);
+		List<Note> trashedNotes=noteService.fetchTrashedNote(token);
 		response.setStatusCode(200);
 		response.setStatusMessage("Fetched Trashed Notes of User ID: " +TokenUtil.verifyToken(token));
 		response.setBody(trashedNotes);

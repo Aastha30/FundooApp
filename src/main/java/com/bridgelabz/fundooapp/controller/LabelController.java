@@ -42,19 +42,19 @@ public class LabelController {
 
 	}
 
-	@PutMapping("/update/{labelID}")
-	public ResponseEntity<Response> updateLabel(@RequestBody LabelDTO labelDTO, @PathVariable Long labelID,
-			@RequestHeader String token) {
+	@PutMapping("/update")
+	public ResponseEntity<Response> updateLabel(@RequestBody Label label,@RequestHeader String token) {
 		Response response = new Response();
-		Label label = labelService.updateLabel(labelDTO, labelID, token);
+		Label updatedLabel = labelService.updateLabel(label, token);
 		response.setStatusCode(200);
 		response.setStatusMessage("Label Updated Successfully");
-		response.setBody(label);
+		response.setBody(updatedLabel);
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@DeleteMapping("/delete/{labelID}")
 	public ResponseEntity<Response> deleteLabel(@PathVariable Long labelID, @RequestHeader String token) {
+		System.out.println(labelID);
 		Response response = new Response();
 		labelService.deleteLabel(labelID, token);
 		response.setStatusCode(200);

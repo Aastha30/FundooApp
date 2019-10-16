@@ -32,12 +32,12 @@ public class LabelServiceImpl implements LabelService {
 	}
 
 	@Override
-	public Label updateLabel(LabelDTO labelDTO, Long labelID, String token) {
+	public Label updateLabel(Label label,String token) {
 		Long userID = TokenUtil.verifyToken(token);
-		Optional<Label> labelToBeUpdated = labelRepository.findByUserIDAndLabelID(userID, labelID);
+		Optional<Label> labelToBeUpdated = labelRepository.findByUserIDAndLabelID(userID, label.getLabelID());
 		Label updatedLabel = labelToBeUpdated.map(existingLabel -> {
 			existingLabel.setLabelName(
-					labelDTO.getLabelName() != null ? labelDTO.getLabelName() : labelToBeUpdated.get().getLabelName());
+					label.getLabelName() != null ? label.getLabelName() : labelToBeUpdated.get().getLabelName());
 			return existingLabel;
 		}).orElseThrow(() -> new UserException(404, "Label Not Found"));
 		return labelRepository.save(updatedLabel);

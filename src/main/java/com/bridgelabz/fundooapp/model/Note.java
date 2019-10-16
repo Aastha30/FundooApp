@@ -27,6 +27,7 @@ public class Note {
 	private boolean isArchive;
 	private boolean isTrash;
 	private boolean isPinned;
+	private String color;
 	@ManyToMany
 	private List<Label> labels;
 	private LocalDateTime reminders;

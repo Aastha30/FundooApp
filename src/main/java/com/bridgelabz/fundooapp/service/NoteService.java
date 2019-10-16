@@ -10,7 +10,7 @@ public interface NoteService {
 
 	public Note createNote(NoteDTO noteDTO, String token) throws Exception;
 	
-	public Note updateNote(NoteDTO noteDTO,long noteID,String token) throws Exception;
+	public Note updateNote(Note note,String token) throws Exception;
 	
 	public void deleteNote(Long noteID,String token);
 	
@@ -19,11 +19,5 @@ public interface NoteService {
 	public List<Note> fetchArchivedNote(String token);
 	
 	public List<Note> fetchTrashedNote(String token);
-	
 
-	
-	
-	
-
-	
 }

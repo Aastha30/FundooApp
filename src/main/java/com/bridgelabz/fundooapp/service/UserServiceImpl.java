@@ -2,6 +2,7 @@ package com.bridgelabz.fundooapp.service;
 
 import java.time.LocalDateTime;
 
+import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +33,11 @@ public class UserServiceImpl implements UserService {
 	private PasswordEncoder passwordEncoder;
 
 	@Override
+	@Transactional
 	public User register(RegisterDTO registerDTO) throws Exception {
 
 		if (userRepository.findByEmailID(registerDTO.getEmailID()).isPresent()
-				|| userRepository.findByMobNum(registerDTO.getMobNum()).isPresent()) {
+		 || userRepository.findByMobNum(registerDTO.getMobNum()).isPresent() ) {
 			throw new UserException(400, "Duplicate User Details Found");
 		}
 		User user = modelMapper.map(registerDTO, User.class);

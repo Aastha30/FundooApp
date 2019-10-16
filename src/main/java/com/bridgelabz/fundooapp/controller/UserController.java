@@ -1,7 +1,5 @@
 package com.bridgelabz.fundooapp.controller;
 
-
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +23,17 @@ import com.bridgelabz.fundooapp.response.Response;
 import com.bridgelabz.fundooapp.service.UserService;
 
 @RestController
-@CrossOrigin(origins="http://localhost:4200",exposedHeaders= {"jwt_token"})
+@CrossOrigin(origins = "http://localhost:4200", exposedHeaders = { "jwt_token" })
 @RequestMapping("/fundoo/user")
 
 public class UserController {
 
 	@Autowired
 	private UserService userService;
-	
 
-	Response response=new Response();
-	
-	@PostMapping("/register")	
+	Response response = new Response();
+
+	@PostMapping("/register")
 	public ResponseEntity<Response> register(@RequestBody RegisterDTO registerDTO) throws Exception {
 		userService.register(registerDTO);
 		response.setStatusCode(200);
@@ -49,36 +46,37 @@ public class UserController {
 		String message = userService.verifyUser(token);
 		response.setStatusCode(200);
 		response.setStatusMessage(message);
-		return new ResponseEntity<>(response,HttpStatus.OK);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<Response> login(@RequestBody LoginDTO loginDTO, HttpServletResponse httpResponse) throws Exception {
-		 UserDetail userDetail=userService.login(loginDTO);
+	public ResponseEntity<Response> login(@RequestBody LoginDTO loginDTO, HttpServletResponse httpResponse)
+			throws Exception {
+		UserDetail userDetail = userService.login(loginDTO);
 		// httpResponse.addHeader("jwt_token", token);
-		 response.setStatusCode(200);
-		 response.setStatusMessage("You are successfully logged in");
-		 response.setBody(userDetail);
-		 return new ResponseEntity<>(response,HttpStatus.OK);
+		response.setStatusCode(200);
+		response.setStatusMessage("You are successfully logged in");
+		response.setBody(userDetail);
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@PostMapping("/forgotpassword")
 	public ResponseEntity<Response> forgotPassword(@RequestParam String emailID) throws Exception {
-		String message=userService.forgotPassword(emailID);
+		String message = userService.forgotPassword(emailID);
 		response.setStatusCode(202);
 		response.setStatusMessage(message);
 		return new ResponseEntity<>(response, HttpStatus.OK);
-		
+
 	}
 
 	@PutMapping("/resetpassword/{token}")
-	public ResponseEntity<Response> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO, @PathVariable String token)
-			throws Exception {
-		String message=userService.resetPassword(resetPasswordDTO, token);
+	public ResponseEntity<Response> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO,
+			@PathVariable String token) throws Exception {
+		String message = userService.resetPassword(resetPasswordDTO, token);
 		response.setStatusCode(200);
 		response.setStatusMessage(message);
-		return new ResponseEntity<>(response,HttpStatus.OK);
-		 
+		return new ResponseEntity<>(response, HttpStatus.OK);
+
 	}
-	
+
 }

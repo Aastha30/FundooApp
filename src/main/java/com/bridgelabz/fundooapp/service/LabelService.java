@@ -9,7 +9,7 @@ public interface LabelService {
 	
 	public Label createLabel(LabelDTO labelDTO, String token);
 	
-	public Label updateLabel(LabelDTO labelDTO,Long labelID,String token);
+	public Label updateLabel(Label label,String token);
 	
 	public void deleteLabel(Long labelID,String token);
 	
