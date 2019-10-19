@@ -15,4 +15,6 @@ public interface NoteRepository extends JpaRepository<Note,Long>{
 	@Query("from Note n where n.isArchive=:isArchive and n.isTrash=:isTrash and n.userID=:userID")
 	List<Note> findByUserID(Long userID, boolean isArchive, boolean isTrash);
 	
+	@Query("from Note n where n.reminder is not null and n.userID=:userID")
+	List<Note> findAllReminder(Long userID);
 	}

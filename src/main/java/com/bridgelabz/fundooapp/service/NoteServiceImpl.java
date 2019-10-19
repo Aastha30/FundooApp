@@ -24,7 +24,6 @@ public class NoteServiceImpl implements NoteService {
 
 	@Autowired
 	private ModelMapper modelMapper;
-	
 
 	@Override
 	public Note createNote(NoteDTO noteDTO, String token) throws Exception {
@@ -51,13 +50,13 @@ public class NoteServiceImpl implements NoteService {
 
 		Note updatedNote = noteToBeUpdated.map(existingNote -> {
 			existingNote.setTitle(note.getTitle() != null ? note.getTitle() : noteToBeUpdated.get().getTitle());
-			existingNote.setDescription(note.getDescription() != null ? note.getDescription()
-					: noteToBeUpdated.get().getDescription());
+			existingNote.setDescription(
+					note.getDescription() != null ? note.getDescription() : noteToBeUpdated.get().getDescription());
 			existingNote.setTrash(note.isTrash());
 			existingNote.setArchive(!note.isTrash() && note.isArchive());
 			existingNote.setPinned(note.isPinned() && !note.isTrash() && !note.isArchive());
-			existingNote.setColor(note.getColor()!=null ? note.getColor(): noteToBeUpdated.get().getColor());
-			
+			existingNote.setColor(note.getColor() != null ? note.getColor() : noteToBeUpdated.get().getColor());
+
 			return existingNote;
 		}).orElseThrow(() -> new UserException(404, "Note Not Found"));
 		updatedNote.setUpdatedTime(LocalDateTime.now());
@@ -82,7 +81,7 @@ public class NoteServiceImpl implements NoteService {
 
 		try {
 			Long userID = TokenUtil.verifyToken(token);
-			return noteRepository.findByUserID(userID,false,false);
+			return noteRepository.findByUserID(userID, false, false);
 		} catch (Exception e) {
 			throw new UserException(404, "Token Not Found");
 		}
@@ -92,7 +91,7 @@ public class NoteServiceImpl implements NoteService {
 	public List<Note> fetchArchivedNote(String token) {
 		try {
 			Long userID = TokenUtil.verifyToken(token);
-			return noteRepository.findByUserID(userID,true,false);
+			return noteRepository.findByUserID(userID, true, false);
 		} catch (Exception e) {
 			throw new UserException(404, "Token Not Found");
 		}
@@ -102,11 +101,44 @@ public class NoteServiceImpl implements NoteService {
 	public List<Note> fetchTrashedNote(String token) {
 		try {
 			Long userID = TokenUtil.verifyToken(token);
-			return noteRepository.findByUserID(userID,false,true);
+			return noteRepository.findByUserID(userID, false, true);
 		} catch (Exception e) {
 			throw new UserException(404, "Token Not Found");
 		}
 
+	}
+
+	@Override
+	public Note addReminder(Long noteID, LocalDateTime reminder, String token) {
+		Long userID = TokenUtil.verifyToken(token);
+		Note note = noteRepository.findByUserIDAndNoteID(userID, noteID).map(existingNote -> {
+			if(reminder.isAfter(LocalDateTime.now())) {
+				existingNote.setReminder(reminder);
+			}
+			else {
+				throw new UserException(404, "Date not acceptable");
+			}
+			return existingNote;
+		}).orElseThrow(() -> new UserException(404, "Note Not Found."));
+		return noteRepository.save(note);
+	}
+
+	@Override
+	public Note removeReminder(Long noteID, String token) {
+		Long userID = TokenUtil.verifyToken(token);
+		Note note = noteRepository.findByUserIDAndNoteID(userID, noteID).map((existingNote) -> {
+			existingNote.setReminder(null);
+			return existingNote;
+		}).orElseThrow(() -> new UserException(404, "Note Not Found."));
+		return noteRepository.save(note);
+	}
+
+	@Override
+	public List<Note> fetchReminderNote(String token) {
+		System.out.println("Inside Fetch Reminder Service");
+		Long userID =TokenUtil.verifyToken(token);
+		return noteRepository.findAllReminder(userID);
+		
 	}
 
 }

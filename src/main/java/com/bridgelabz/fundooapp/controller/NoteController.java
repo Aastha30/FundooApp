@@ -1,8 +1,11 @@
  package com.bridgelabz.fundooapp.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -49,9 +52,10 @@ public class NoteController {
 	public ResponseEntity<Response> updateNote(@RequestBody Note note, @RequestHeader String token) throws Exception
 	{
 		Response response= new Response();
-		noteService.updateNote(note,token);
+		Note updatedNote = noteService.updateNote(note,token);
 		response.setStatusCode(200);
 		response.setStatusMessage("Note Updated Successfully");
+		response.setBody(updatedNote);
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
@@ -96,5 +100,35 @@ public class NoteController {
 		response.setStatusMessage("Fetched Trashed Notes of User ID: " +TokenUtil.verifyToken(token));
 		response.setBody(trashedNotes);
 		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
+	
+	@GetMapping("/addReminder/{noteID}" )
+	public ResponseEntity<Response> addReminder(@PathVariable Long noteID, @DateTimeFormat(iso = ISO.DATE_TIME) @RequestParam LocalDateTime reminder, @RequestHeader String token) {
+		Response response=new Response();
+		Note note =noteService.addReminder(noteID, reminder, token);
+		response.setStatusCode(200);
+		response.setStatusMessage("Reminder added");
+		response.setBody(note);
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
+	
+	@GetMapping("/removeReminder/{noteID}")
+	public ResponseEntity<Response>removeReminder(@PathVariable Long noteID, @RequestHeader String token) {
+		Response response = new Response();
+		Note note=noteService.removeReminder(noteID, token);
+		response.setStatusCode(200);
+		response.setStatusMessage("Reminder removed");
+		response.setBody(note);
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@GetMapping("/fetchReminder")
+	public ResponseEntity<Response> fetchReminderNote(@RequestHeader String token) {
+		Response response = new Response();
+		List<Note> reminderNotes =noteService.fetchReminderNote(token);
+		response.setStatusCode(200);
+		response.setBody(reminderNotes);
+		response.setStatusMessage("Fetched Reminder Notes of User ID: " +TokenUtil.verifyToken(token));
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 }

@@ -30,7 +30,7 @@ public class Note {
 	private String color;
 	@ManyToMany
 	private List<Label> labels;
-	private LocalDateTime reminders;
+	private LocalDateTime reminder;
 	private LocalDateTime createdTime;
 	private LocalDateTime updatedTime;
 
